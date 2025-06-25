@@ -135,11 +135,11 @@ const numberOfParaphrased = ref<number>(0);
 const expandedCounts = ref<ExpandedCount[]>([]);
 
 onMounted(async () => {
+  await window?.electron.createReviews();
   window?.electron.fetchRowCount().then((data) => {
     numberOfExamples.value = data[0].count;
   });
 
-  window?.electron.createReviews();
   window?.electron.createUser();
   expandedCounts.value = await window?.electron.fetchExpandedCounts();
   await selectNextIndex();
@@ -321,26 +321,10 @@ const sharedReviews: {
   expanded: number;
   paraphrased: number;
 }[] = [
-  { template: 10, expanded: 443, paraphrased: 0 },
-  { template: 0, expanded: 39, paraphrased: 0 },
-  { template: 56, expanded: 12, paraphrased: 2 },
-  { template: 32, expanded: 16, paraphrased: 0 },
-  { template: 12, expanded: 1166, paraphrased: 1 },
-  { template: 47, expanded: 305, paraphrased: 0 },
-  { template: 1, expanded: 21, paraphrased: 0 },
-  { template: 55, expanded: 10, paraphrased: 1 },
-  { template: 38, expanded: 31, paraphrased: 1 },
-  { template: 1, expanded: 48, paraphrased: 0 },
-  { template: 4, expanded: 7, paraphrased: 0 },
-  { template: 4, expanded: 5, paraphrased: 0 },
-  { template: 57, expanded: 71, paraphrased: 1 },
-  { template: 30, expanded: 28, paraphrased: 0 },
-  { template: 49, expanded: 1186, paraphrased: 0 },
-  { template: 52, expanded: 736, paraphrased: 0 },
-  { template: 40, expanded: 62, paraphrased: 0 },
-  { template: 30, expanded: 25, paraphrased: 0 },
-  { template: 9, expanded: 174, paraphrased: 0 },
-  { template: 8, expanded: 240, paraphrased: 0 },
+  { template: 0, expanded: 0, paraphrased: 0},
+  { template: 0, expanded: 0, paraphrased: 1},
+  { template: 0, expanded: 1, paraphrased: 0},
+  
 ];
 
 async function selectNextIndex() {
@@ -628,7 +612,7 @@ const lookupModel = ref<number>(0);
           </p> -->
           <p class="text-h6">Dataset: {{ currentExample.dataset_schema }}</p>
           <p class="text-h5">
-            {{ currentExample.query }}
+            {{ currentExample.query_base }}
           </p>
           <UDIVis v-if="validSpec" :spec="spec"></UDIVis>
         </template>
