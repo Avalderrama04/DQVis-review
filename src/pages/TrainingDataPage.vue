@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, nextTick, watch } from 'vue';
 import { useTrainingStore } from 'src/stores/TrainingStore';
-
+import { embed } from 'gosling.js' ;
 const trainingStore = useTrainingStore();
 
 const currentIndex = ref<{
@@ -145,9 +145,12 @@ onMounted(async () => {
   await selectNextIndex();
   fetchCurrentExampleTrainingData();
   fetchCurrentExampleParaphrasedCount();
+ 
   const fetchedUser = await window?.electron.fetchUser();
   user.value = fetchedUser.value;
+  
 });
+
 
 export interface UserQuery {
   value: string; // should be the unique UID of the user
@@ -199,6 +202,24 @@ const validSpec = computed(() => {
     return false;
   }
 });
+
+watch(
+  (): [TrainingData | null, boolean] => [currentExample.value, validSpec.value], 
+  ([example, valid]: [TrainingData | null, boolean]) => { 
+    if (example && valid) {
+      nextTick(() => {
+        const container = document.getElementById('gosling-container');
+        console.log('Gosling container:', container);
+        if (container) {
+          embed(container, spec.value);
+        } else {
+          console.error('Gosling container not found');
+        }
+      });
+    }
+  },
+  { immediate: true }
+);
 
 const spec = computed(() => {
   return JSON.parse(currentExample.value?.spec ?? '');
@@ -371,6 +392,7 @@ async function selectNextIndex() {
   console.log('next index');
   console.log(currentIndex.value);
 }
+
 
 const lookupModel = ref<number>(0);
 </script>
@@ -610,14 +632,16 @@ const lookupModel = ref<number>(0);
           <p class="text-h6">
             complexity: {{ currentExample.chart_complexity }}
           </p> -->
+
           <p class="text-h6">Dataset: {{ currentExample.dataset_schema }}</p>
           <p class="text-h5">
             {{ currentExample.query_base }}
           </p>
-          <UDIVis v-if="validSpec" :spec="spec"></UDIVis>
+          <div id = "gosling-container" class="gosling-container q-my-md"></div>
+
         </template>
         <template v-else>
-          <div>Loading...</div>
+          
         </template>
       </div>
       <q-card flat class="q-mb-md mw-585" v-if="currentExample">
